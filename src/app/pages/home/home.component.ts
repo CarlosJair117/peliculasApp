@@ -1,4 +1,4 @@
-import { Component, Host, HostListener, OnInit } from '@angular/core';
+import { Component, Host, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Movie } from 'src/app/interfaces/catelera-response';
 import { PeliculasService } from 'src/app/services/peliculas.service';
 
@@ -7,7 +7,7 @@ import { PeliculasService } from 'src/app/services/peliculas.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   
   public movies: Movie [] = [];
   public moviesSlideshow: Movie [] = [];
@@ -19,8 +19,11 @@ export class HomeComponent implements OnInit {
     const max = (document.documentElement.scrollHeight || document.body.scrollHeight);
 
     if (pos > max){
-      this.peliculasService.getCartelera().subscribe( resp => {
-        this.movies.push(...resp.results);
+
+      if( this.peliculasService.cargando ) { return; }
+
+      this.peliculasService.getCartelera().subscribe( movies => {
+        this.movies.push(...movies );
       });
     }
   }
@@ -30,11 +33,15 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
 
     this.peliculasService.getCartelera()
-    .subscribe( resp => {
+    .subscribe( movies => {
       //console.log(resp);
-      this.movies = resp.results;
-      this.moviesSlideshow = resp.results;
+      this.movies = movies;
+      this.moviesSlideshow = movies;
     });
+  }
+
+  ngOnDestroy() {
+    this.peliculasService.resetCarteleraPage();
   }
 
 }
