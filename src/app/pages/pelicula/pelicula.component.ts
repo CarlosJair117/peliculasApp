@@ -1,4 +1,8 @@
+import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { MovieResponse } from 'src/app/interfaces/movie-response';
+import { PeliculasService } from 'src/app/services/peliculas.service';
 
 @Component({
   selector: 'app-pelicula',
@@ -7,9 +11,23 @@ import { Component, OnInit } from '@angular/core';
 })
 export class PeliculaComponent implements OnInit {
 
-  constructor() { }
+  public pelicula: MovieResponse;
+
+  constructor( private activatedRoute: ActivatedRoute, private peliculasService: PeliculasService, private location: Location) { }
 
   ngOnInit(): void {
+
+    const {id} = this.activatedRoute.snapshot.params;
+
+    this.peliculasService.getPeliculaDetalle(id).subscribe( movie => {
+      console.log(movie);
+      this.pelicula = movie;
+    });
+
+  }
+
+  onRegresar(){
+    this.location.back();
   }
 
 }
